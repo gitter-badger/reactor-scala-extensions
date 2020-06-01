@@ -1,0 +1,33 @@
+configurations {
+    scalaAnt
+}
+
+dependencyCheck {
+    skipConfigurations = ["apiElements", "implementation", "runtimeElements", "runtimeOnly", "testImplementation", "testRuntimeOnly", "scoverageImplementation", "scoverageRuntimeOnly"]
+}
+
+dependencies {
+    scalaAnt 'com.sandinh:scala-ant_2.13:2.13.1'
+
+    compile libraries.reactorCore
+    implementation libraries.scalaCollCompat
+
+//    test dependencies
+    testImplementation libraries.reactorTest
+    testImplementation libraries.scalatest
+    testImplementation libraries.mockitoScala
+    testImplementation libraries.mockitoInline
+    testImplementation libraries.scalaLogging
+    testRuntimeOnly libraries.logback
+}
+
+
+scaladoc {
+    scalaClasspath += baseScalaVersion == "2.13"? configurations.scalaAnt : layout.files()
+}
+
+scaladoc.scalaDocOptions.additionalParameters = ["-no-link-warnings"]
+if(baseScalaVersion == "2.11") {
+    compileScala.scalaCompileOptions.additionalParameters = ["-target:jvm-1.8"]
+    compileTestScala.scalaCompileOptions.additionalParameters = ["-target:jvm-1.8"]
+}

@@ -2,7 +2,6 @@ buildscript {
     apply from: file('versions.gradle')
 }
 plugins {
-    id "scala"
     id "com.github.maiflai.scalatest" version "0.25"
     id "signing"
     id "maven"
@@ -17,36 +16,31 @@ plugins {
 group 'io.projectreactor'
 description = 'A scala extension for Project Reactor Flux and Mono'
 
-repositories {
-    mavenCentral()
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+
 }
-configurations {
-    scalaAnt
+
+subprojects {
+    apply plugin: "scala"
+    apply plugin: "com.github.maiflai.scalatest"
+    apply plugin: "org.scoverage"
+
+    test {
+        maxParallelForks = 1
+        reports.html.enabled = false
+    }
+    dependencies {
+        implementation libraries.scalaLibrary
+    }
 }
+
 dependencies {
-    scalaAnt 'com.sandinh:scala-ant_2.13:2.13.1'
-
     zinc "com.typesafe.zinc:zinc:0.3.15"
-
-    implementation libraries.scalaLibrary
-    implementation libraries.reactorCore
-    implementation libraries.scalaCollCompat
-
-//    test dependencies
-    testImplementation libraries.scalatest
-    testImplementation libraries.reactorTest
-    testImplementation libraries.mockitoInline
-    testImplementation libraries.mockitoScala
-    testImplementation libraries.scalaLogging
-    testRuntimeOnly libraries.logback
-}
-scaladoc {
-    scalaClasspath += baseScalaVersion == "2.13"? configurations.scalaAnt : layout.files()
 }
 
-dependencyCheck {
-    skipConfigurations = ["apiElements", "implementation", "runtimeElements", "runtimeOnly", "testImplementation", "testRuntimeOnly", "scoverageImplementation", "scoverageRuntimeOnly"]
-}
 targetCompatibility = "1.8"
 
 if (!project.parent) {
@@ -225,19 +219,10 @@ ScalaCompileOptions.metaClass.fork = true
 ScalaCompileOptions.metaClass.useAnt = false
 ScalaCompileOptions.metaClass.useCompileDaemon = false
 
-project.tasks.scaladoc.scalaDocOptions.additionalParameters = ["-no-link-warnings"]
-project.tasks.compileScala.scalaCompileOptions.additionalParameters = ["-target:jvm-1.8", "-feature"]
-project.tasks.compileTestScala.scalaCompileOptions.additionalParameters = ["-target:jvm-1.8"]
-
 release {
     git {
         requireBranch = ''
     }
-}
-
-test {
-    maxParallelForks = 1
-    reports.html.enabled = false
 }
 
 tasks.withType(Sign) {

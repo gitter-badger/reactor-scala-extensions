@@ -1,0 +1,7 @@
+dependencies {
+    testImplementation project(":reactor-scala")
+    testImplementation libraries.scalatest
+    testRuntimeOnly libraries.micrometer
+}
+
+jar.enabled = false
